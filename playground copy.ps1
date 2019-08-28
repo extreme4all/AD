@@ -13,7 +13,7 @@ $scriptblock = {
     )
     $scriptblock = ([scriptblock]::Create($scriptblock))
     # Pretend I connected to a server here and gathered some info
-    Write-Output "Type: $server FirstLoop: $count isFirst:$go"
+    Write-Output "Type: $server Loop: $count isFirst:$go"
     if($go -eq 1){
         1..5 | ForEach-Object {
             $go = 0
