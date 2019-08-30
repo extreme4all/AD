@@ -41,7 +41,12 @@ $scriptblock = {
             foreach ($runspace in $completed){
                 $results = $runspace.Pipe.EndInvoke($runspace.Status)
                 # write output to get the data in the main loop
+                # $date = Get-Date -Format "yyyy-MM-dd"
+                # Start-Transcript -Path "$($location)\$($date)_INHjobs.log" -Append
+                $date = Get-Date -Format "yyyy-MM-dd"
+                Add-Content -Path "$($location)\$($date)_INHjobs.log" -Value $results
                 foreach($result in $results){Write-Output $result}
+                # Stop-Transcript
                 $runspace.Status = $null
             }
         }
@@ -64,7 +69,9 @@ $scriptblock = {
     # corrects inheritanceFlags that are setup incorrect
     function get-inheritance($ACL,$ACE,$folder){
         if($ACE.InheritanceFlags -ne "ContainerInherit, ObjectInherit" -or $ACE.PropagationFlags -ne 'None'){
-            write-output "no inheritance in $($folder) $($ACE.IdentityReference)"
+            write-output "no inheritance: $($folder) $($ACE.IdentityReference)"
+            $date = Get-Date -Format "yyyy-MM-dd"
+            Add-Content -Path "$($location)\$($date)_INHjobs.log" -Value $folder
             # $permission = $ACE.IdentityReference, $ACE.FileSystemRights,'ContainerInherit,ObjectInherit', 'None','Allow'
             # $rule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission
             # $ACL.SetAccessRule($rule)
@@ -116,8 +123,9 @@ $scriptblock = {
                 }
 
                 if($FolderLVL -eq 3){
-                    write-output $folder
-                    get-runspace $folder $startSlash $location $scriptblock $pool
+                    # write-output $folder
+                    # Add-Content -Path "$($location)\$($date)_INHjobs.log" -Value $folder
+                    get-runspace $folder $startSlash $location $scriptblock $pool  
                 }else {
                     get-test($folder)
                 }
@@ -130,11 +138,13 @@ $scriptblock = {
             continue
         }
     }
+
     $date = Get-Date -Format "yyyy-MM-dd"
     $error_output_path = "$($location)\$($date)_Errors.csv"
+    
     # error output file
     if(-not (Test-Path $error_output_path -PathType Leaf)){
-        write-output "Path does not exist: $($error_output_path)"
+        write-output "Create error folder: $($error_output_path)"
         Add-Content $error_output_path "Date;Folder;Error"
     }
     get-test($start)
@@ -169,7 +179,9 @@ function get-runspace{
         foreach ($runspace in $completed){
             $results = $runspace.Pipe.EndInvoke($runspace.Status)
             # write output to get the data in the main loop
-            foreach($result in $results){Write-Output $result}
+            # foreach($result in $results){Write-Output $result}
+            $date = Get-Date -Format "yyyy-MM-dd"
+            Add-Content -Path "$($location)\$($date)_INHjobs.log" -Value $results
             $runspace.Status = $null
         }
     }
@@ -177,18 +189,17 @@ function get-runspace{
 
 $Stopwatch = [system.diagnostics.stopwatch]::StartNew()
 
-
-
 $start = "C:\Users\ycreyf\Desktop\Test\"
 $startSlash = ($start.ToCharArray() | ? { $_ -eq "\" } | measure ).count -1
 $location = 'C:\Users\ycreyf\OneDrive - Telenet\Working Folders\Scripts&Exports\PowerShell' # get-location
-$date = Get-Date -Format "yyyy-MM-dd"
-Start-Transcript -Path "$($location)\$($date)_INHjobs.log" -Append
 
 get-runspace $start $startSlash $location $scriptblock $pool
 
+$date = Get-Date -Format "yyyy-MM-dd"
+Add-Content "$($location)\Last_scan_all_Folders.csv" $date
+
 $pool.Close()
 $pool.Dispose()
-Stop-Transcript
+
 $Stopwatch.Stop()
 $Stopwatch.Elapsed
