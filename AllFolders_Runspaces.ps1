@@ -38,7 +38,8 @@ $scriptblock = {
                     continue
                 }
                 #loop through all $ACL of folder
-                $sw = New-Object System.IO.StreamWriter "$($location)\FolderPerm.csv",$true
+                $date = get-date -Format "yyyy-MM-dd"
+                $sw = New-Object System.IO.StreamWriter "$($location)\$($date)_FolderPerm.csv",$true
                 foreach($ACE in $ACL.Access){
                     # write all access rules of a folder to file
                     $sw.WriteLine("$($folder);$($ACE.IdentityReference);$($FolderLVL);$($ACE.IsInherited)")
@@ -92,6 +93,7 @@ function get-runspace{
 
 # loop to 3th level folder
 # for each 3th level folder start a runspace
+
 function get-Folders{
     param(
         $path,
@@ -127,7 +129,8 @@ function get-Folders{
             }
             # loop to the access rules in the ACL
             # write the access rules to file
-            $sw = New-Object System.IO.StreamWriter "$($location)\FolderPerm.csv",$true
+            $date = get-date -Format "yyyy-MM-dd"
+            $sw = New-Object System.IO.StreamWriter "$($location)\$($date)_FolderPerm.csv",$true
             foreach($ACE in $ACL.Access){
                 $sw.WriteLine("$($folder);$($ACE.IdentityReference);$($FolderLVL);$($ACE.IsInherited)")
             }
@@ -154,7 +157,7 @@ $date = Get-Date -Format "yyyy-MM-dd"
 $error_output_path = "$($location)\$($date)_Errors.csv"
 # error output file; adding headers
 if(-not (Test-Path $error_output_path -PathType Leaf)){
-    write-warning "Path does not exist: $($error_output_path)"
+    write-warning "Creating error file with headers: $($error_output_path)"
     Add-Content $error_output_path "Date;Folder;Error"
 }
 
