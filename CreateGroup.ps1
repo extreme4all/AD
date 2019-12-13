@@ -31,6 +31,7 @@ function get-groupName($Group_Name){
 function get-Newgroup($Group_Name){
     $Group_Name=get-groupName($Group)
 
+    #should be read from a config file
     $Group_Scope = switch -Wildcard ($Group_Name){
         '(D)*'      {2} #Universal
         '(C)*'      {2} #Universal
@@ -39,7 +40,7 @@ function get-Newgroup($Group_Name){
         '(ASG)*'    {1} #Global
         default     {1} #Global
     }
-    
+    #should be read from a config file
     $Group_Path = switch -Wildcard ($Group_Name){
         '(A)*'      {"OU=Groups TIM Application Entitlements,OU=PROD,DC=prod,DC=telenet,DC=be"}
         '(ASG)*'    {"OU=Applications,DC=prod,DC=telenet,DC=be"}
