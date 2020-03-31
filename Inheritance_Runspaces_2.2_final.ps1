@@ -106,11 +106,6 @@ $scriptblock = {
                 get-inheritance $ACL $ACE $folder
                 continue
             }
-            ## for local system
-            if($IDRef -eq 'PROD\ycreyf'){
-                get-inheritance $ACL $ACE $folder
-                continue
-            }
 
             # this ACE does not fit the criteria to be a 3th lvl group
             # must be removed
